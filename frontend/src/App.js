@@ -1576,7 +1576,7 @@ function App() {
         <div className="mb-8">
           <h2 className="font-semibold mb-4 text-white" style={{ fontSize: '18px' }}>{t('chooseSession')}</h2>
           <div className="space-y-4">
-            {courses.map(course => (
+            {visibleCourses.map(course => (
               <div key={course.id} className={`course-card rounded-xl p-5 ${selectedCourse?.id === course.id ? 'selected' : ''}`} data-testid={`course-card-${course.id}`}>
                 <h3 className="font-semibold text-white">{course.name}</h3>
                 <div className="flex items-center gap-2 text-xs text-white opacity-60 mb-1">
@@ -1592,6 +1592,9 @@ function App() {
                 {renderDates(course)}
               </div>
             ))}
+            {visibleCourses.length === 0 && (
+              <p className="text-center py-8 text-white opacity-50">Aucun cours disponible pour le moment</p>
+            )}
           </div>
         </div>
 
