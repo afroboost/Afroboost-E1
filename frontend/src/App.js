@@ -636,7 +636,15 @@ const CoachDashboard = ({ t, lang, onBack, onLogout }) => {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   };
 
-  const saveConcept = async () => { await axios.put(`${API}/concept`, concept); alert("Saved!"); };
+  const saveConcept = async () => { 
+    try {
+      await axios.put(`${API}/concept`, concept); 
+      alert("✅ Concept sauvegardé avec succès !");
+    } catch (err) {
+      console.error("Error saving concept:", err);
+      alert("❌ Erreur lors de la sauvegarde");
+    }
+  };
   const savePayments = async () => { await axios.put(`${API}/payment-links`, paymentLinks); alert("Saved!"); };
 
   const addCode = async (e) => {
