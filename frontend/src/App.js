@@ -404,10 +404,11 @@ const LanguageSelector = ({ lang, setLang }) => {
   );
 };
 
-// Media Display Component (YouTube, Vimeo, Image, Video) - Strict 16:9 ratio
+// Media Display Component (YouTube, Vimeo, Image, Video) - Strict 16:9 ratio with click protection
 const MediaDisplay = ({ url, className }) => {
   const media = parseMediaUrl(url);
-  if (!media) return null;
+  // Return null if no valid media URL
+  if (!media || !url || url.trim() === '') return null;
 
   // 16:9 container wrapper
   const containerStyle = {
@@ -429,15 +430,31 @@ const MediaDisplay = ({ url, className }) => {
     height: '100%'
   };
 
+  // Overlay to prevent clicking on YouTube/Vimeo links (keeps user on site)
+  const overlayStyle = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: 10,
+    cursor: 'default',
+    background: 'transparent'
+  };
+
   if (media.type === 'youtube') {
+    // YouTube params: modestbranding=1, rel=0, showinfo=0 to hide external links
     return (
       <div className={className} style={containerStyle} data-testid="media-container-16-9">
         <iframe 
-          src={`https://www.youtube.com/embed/${media.id}?autoplay=1&mute=1&loop=1&playlist=${media.id}`}
-          frameBorder="0" allow="autoplay; encrypted-media" allowFullScreen
+          src={`https://www.youtube.com/embed/${media.id}?autoplay=1&mute=1&loop=1&playlist=${media.id}&modestbranding=1&rel=0&showinfo=0&controls=0&disablekb=1&fs=0&iv_load_policy=3`}
+          frameBorder="0" 
+          allow="autoplay; encrypted-media" 
           style={contentStyle}
           title="YouTube video"
         />
+        {/* Invisible overlay to block clicks on YouTube logo/title */}
+        <div style={overlayStyle} onClick={(e) => e.preventDefault()} />
       </div>
     );
   }
@@ -446,11 +463,14 @@ const MediaDisplay = ({ url, className }) => {
     return (
       <div className={className} style={containerStyle} data-testid="media-container-16-9">
         <iframe 
-          src={`https://player.vimeo.com/video/${media.id}?autoplay=1&muted=1&loop=1&background=1`}
-          frameBorder="0" allow="autoplay" allowFullScreen
+          src={`https://player.vimeo.com/video/${media.id}?autoplay=1&muted=1&loop=1&background=1&title=0&byline=0&portrait=0`}
+          frameBorder="0" 
+          allow="autoplay" 
           style={contentStyle}
           title="Vimeo video"
         />
+        {/* Invisible overlay to block clicks */}
+        <div style={overlayStyle} onClick={(e) => e.preventDefault()} />
       </div>
     );
   }
@@ -463,6 +483,7 @@ const MediaDisplay = ({ url, className }) => {
     );
   }
   
+  // Image type
   return (
     <div className={className} style={containerStyle} data-testid="media-container-16-9">
       <img src={media.url} alt="Media" style={{ ...contentStyle, objectFit: 'cover' }} />
