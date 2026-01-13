@@ -2371,10 +2371,12 @@ function App() {
         >
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">📲</span>
+              <span className="text-2xl">{isIOS ? '📤' : '📲'}</span>
               <div>
                 <p className="text-white font-semibold text-sm">Installer Afroboost</p>
-                <p className="text-white text-xs opacity-80">Accès rapide depuis votre écran d'accueil</p>
+                <p className="text-white text-xs opacity-80">
+                  {isIOS ? 'Appuyez sur Partager puis "Sur l\'écran d\'accueil"' : 'Accès rapide depuis votre écran d\'accueil'}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -2384,7 +2386,7 @@ function App() {
                 style={{ background: '#000', color: '#fff' }}
                 data-testid="pwa-install-btn"
               >
-                Installer
+                {isIOS ? 'Comment ?' : 'Installer'}
               </button>
               <button 
                 onClick={dismissInstallBanner}
