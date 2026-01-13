@@ -1584,31 +1584,56 @@ function App() {
             <div className="form-section rounded-xl p-6 mb-6">
               <h2 className="font-semibold mb-4 text-white" style={{ fontSize: '18px' }}>{t('yourInfo')}</h2>
               <div className="space-y-4">
-                {/* Private input fields - no email list exposed */}
+                {/* Private input fields with auto-fill support */}
                 <input type="text" required placeholder={t('fullName')} value={userName} onChange={e => setUserName(e.target.value)} className="w-full p-3 rounded-lg neon-input" data-testid="user-name-input" autoComplete="name" />
-                <input type="email" required placeholder={t('emailRequired')} value={userEmail} onChange={e => setUserEmail(e.target.value)} className="w-full p-3 rounded-lg neon-input" data-testid="user-email-input" autoComplete="email" />
+                <input type="email" required placeholder={t('emailRequired')} value={userEmail} onChange={e => handleEmailChange(e.target.value)} className="w-full p-3 rounded-lg neon-input" data-testid="user-email-input" autoComplete="email" />
                 <input type="tel" required placeholder={t('whatsappRequired')} value={userWhatsapp} onChange={e => setUserWhatsapp(e.target.value)} className="w-full p-3 rounded-lg neon-input" data-testid="user-whatsapp-input" autoComplete="tel" />
                 
                 {/* Promo code input */}
                 <div>
-                  <input type="text" placeholder={t('promoCode')} value={discountCode} onChange={e => setDiscountCode(e.target.value)}
+                  <input type="text" placeholder={t('promoCode')} value={discountCode} onChange={e => setDiscountCode(e.target.value.toUpperCase())}
                     className={`w-full p-3 rounded-lg ${appliedDiscount ? 'valid-code' : 'neon-input'}`} data-testid="discount-code-input" autoComplete="off" />
+                  
+                  {/* INTERFACE: Message clair sous le champ code promo */}
+                  {promoMessage.text && (
+                    <p className={`mt-2 text-sm font-medium ${promoMessage.type === 'success' ? 'text-green-400' : promoMessage.type === 'error' ? 'text-red-400' : 'text-yellow-400'}`} data-testid="promo-message">
+                      {promoMessage.text}
+                    </p>
+                  )}
                 </div>
                 
-                {/* Validation message - error in red, success handled in discount display */}
-                {validationMessage && !appliedDiscount && (
+                {/* Other validation messages */}
+                {validationMessage && (
                   <p className="text-red-400 text-sm font-medium" data-testid="validation-message">{validationMessage}</p>
                 )}
                 
                 {/* Price summary with discount */}
                 <div className="p-4 rounded-lg card-gradient">
-                  {appliedDiscount && (
-                    <p className="text-green-400 text-sm mb-2 font-medium" data-testid="discount-applied">
-                      ✅ Code appliqué ! {t('discount')}: {appliedDiscount.type === 'CHF' ? `-${appliedDiscount.value} CHF` : appliedDiscount.type === '100%' ? '100% (Gratuit)' : `-${appliedDiscount.value}%`}
-                    </p>
+                  {selectedOffer && (
+                    <>
+                      <div className="flex justify-between text-white text-sm mb-1">
+                        <span>{selectedOffer.name}</span>
+                        <span>CHF {selectedOffer.price.toFixed(2)}</span>
+                      </div>
+                      {appliedDiscount && (
+                        <div className="flex justify-between text-green-400 text-sm mb-1">
+                          <span>Réduction ({appliedDiscount.code})</span>
+                          <span>
+                            {appliedDiscount.type === '100%' ? '-100%' : 
+                             appliedDiscount.type === '%' ? `-${appliedDiscount.value}%` : 
+                             `-${appliedDiscount.value} CHF`}
+                          </span>
+                        </div>
+                      )}
+                      <hr className="border-gray-600 my-2" />
+                    </>
                   )}
-                  <p className="font-bold text-white text-lg" data-testid="total-price">
-                    {t('total')}: <span style={{ color: appliedDiscount ? '#4ade80' : '#d91cd2' }}>CHF {totalPrice}</span>
+                  <p className="font-bold text-white text-lg flex justify-between" data-testid="total-price">
+                    <span>{t('total')}:</span>
+                    <span style={{ color: parseFloat(totalPrice) === 0 ? '#4ade80' : '#d91cd2' }}>
+                      CHF {totalPrice}
+                      {parseFloat(totalPrice) === 0 && <span className="ml-2 text-sm">(GRATUIT)</span>}
+                    </span>
                   </p>
                 </div>
                 
@@ -1618,8 +1643,12 @@ function App() {
                 </label>
               </div>
             </div>
-            <button type="submit" disabled={!hasAcceptedTerms || loading} className="btn-primary w-full py-4 rounded-xl font-bold uppercase tracking-wide" data-testid="submit-reservation-btn">
-              {loading ? t('loading') : isFree ? t('reserveFree') : t('payAndReserve')}
+            
+            {/* DYNAMISME DU BOUTON: Change selon le montant total */}
+            <button type="submit" disabled={!hasAcceptedTerms || loading} 
+              className={`w-full py-4 rounded-xl font-bold uppercase tracking-wide ${parseFloat(totalPrice) === 0 ? 'btn-free' : 'btn-primary'}`} 
+              data-testid="submit-reservation-btn">
+              {loading ? t('loading') : parseFloat(totalPrice) === 0 ? '🎁 Réserver gratuitement' : t('payAndReserve')}
             </button>
           </form>
         )}
