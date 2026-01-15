@@ -344,6 +344,20 @@ async def create_reservation(reservation: ReservationCreate):
     await db.reservations.insert_one(doc)
     return res_obj
 
+@api_router.post("/reservations/{reservation_code}/validate")
+async def validate_reservation(reservation_code: str):
+    """Validate a reservation by QR code scan (coach action)"""
+    reservation = await db.reservations.find_one({"reservationCode": reservation_code}, {"_id": 0})
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Réservation non trouvée")
+    
+    # Mark as validated
+    await db.reservations.update_one(
+        {"reservationCode": reservation_code},
+        {"$set": {"validated": True, "validatedAt": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"success": True, "message": "Réservation validée", "reservation": reservation}
+
 @api_router.delete("/reservations/{reservation_id}")
 async def delete_reservation(reservation_id: str):
     await db.reservations.delete_one({"id": reservation_id})
