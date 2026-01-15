@@ -262,6 +262,8 @@ Application de réservation de casques audio pour des cours de fitness Afroboost
 - [x] Bouton "Voir les avis Google" côté client
 - [x] Champ "Lien des avis Google" dans Mode Coach
 - [x] Gestionnaire de Campagnes opérationnel (Email BCC, WhatsApp nav, Instagram DM)
+- [x] Intégration EmailJS automatisée avec barre de progression
+- [x] Refactoring modulaire P1 (composants + services)
 
 ### P1 - À faire
 - [ ] Continuer refactoring: Extraire CoachDashboard, CoachLoginModal dans composants séparés
