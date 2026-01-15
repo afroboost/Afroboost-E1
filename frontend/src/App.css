@@ -178,8 +178,10 @@ html, body {
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), 0 0 5px rgba(139, 92, 246, 0.1);
   background: linear-gradient(180deg, rgba(5, 5, 10, 0.95) 0%, rgba(25, 12, 35, 0.7) 100%);
   height: auto !important;
-  min-height: 400px;
+  min-height: 500px !important;
   overflow: visible !important;
+  display: flex;
+  flex-direction: column;
 }
 
 .offer-card:hover {
@@ -196,7 +198,14 @@ html, body {
     0 0 40px rgba(217, 28, 210, 0.25),
     inset 0 0 30px rgba(217, 28, 210, 0.08);
   height: auto !important;
-  min-height: 400px;
+  min-height: 500px !important;
+  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Conteneur parent des offres - overflow visible */
+.offers-container, .offers-slider {
   overflow: visible !important;
 }
 
