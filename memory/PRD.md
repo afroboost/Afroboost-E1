@@ -184,16 +184,30 @@ Application de réservation de casques audio pour des cours de fitness Afroboost
    - Panneau de configuration avec 3 champs (Service ID, Template ID, Public Key)
    - Bouton "💾 Sauvegarder" + "🧪 Tester" avec email de test
    - Instructions pour créer un template EmailJS
-   - Indicateur "✅ Configuré" / "⚠️ Non configuré"
 
-3. ✅ **Envoi automatique avec progression**:
-   - Barre de progression "Envoi en cours : X/Total"
-   - Affichage du nom du contact en cours d'envoi
-   - Récapitulatif final "X envoyés / X échecs"
-   - Délai de 200ms entre les envois (anti rate-limiting)
+### Intégration WhatsApp API Twilio (15 Jan 2026)
+1. ✅ **Service WhatsApp créé**:
+   - `/services/whatsappService.js` - Envoi automatisé via Twilio API
+   - Fonctions: `sendWhatsAppMessage`, `sendBulkWhatsApp`, `testWhatsAppConfig`
+   - Format E.164 automatique pour les numéros suisses (+41)
+   - Support des médias (images/vidéos) via MediaUrl
 
-4. ✅ **Fallback conservé**:
-   - Lien "📧 Ouvrir client email (BCC)" toujours disponible
+2. ✅ **Interface Admin WhatsApp**:
+   - Panneau de configuration avec 3 champs (Account SID, Auth Token, From Number)
+   - Auth Token masqué pour sécurité
+   - Bouton "💾 Sauvegarder" + "🧪 Tester" avec numéro de test
+   - Instructions Sandbox Twilio détaillées
+
+3. ✅ **Champ URL du média**:
+   - Champ "📎 URL du média (image/vidéo)" dans le mode Envoi Direct
+   - Aperçu miniature si URL valide
+   - Transmis comme `media_url` dans les appels API
+
+4. ✅ **Envoi groupé automatique**:
+   - Bouton gradient "🚀 Envoyer Email + WhatsApp"
+   - Barre de progression globale indiquant le canal en cours
+   - Récapitulatif final avec stats par canal
+   - Mode manuel WhatsApp conservé (←/Ouvrir/→)
 
 ---
 
