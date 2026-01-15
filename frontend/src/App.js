@@ -3499,6 +3499,109 @@ const CoachDashboard = ({ t, lang, onBack, onLogout }) => {
               </div>
             )}
 
+            {/* === PANNEAU DE CONFIGURATION WHATSAPP API === */}
+            {showWhatsAppConfig && (
+              <div className="mb-8 p-5 rounded-xl glass border-2 border-green-500/50">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-white font-semibold flex items-center gap-2">
+                    ⚙️ Configuration WhatsApp API (Twilio)
+                  </h3>
+                  <button 
+                    type="button"
+                    onClick={() => setShowWhatsAppConfig(false)}
+                    className="text-white/60 hover:text-white"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <p className="text-xs text-white/60 mb-4">
+                  Créez un compte sur <a href="https://www.twilio.com" target="_blank" rel="noopener noreferrer" className="text-green-400 underline">twilio.com</a>, 
+                  activez WhatsApp Sandbox, puis ajoutez vos clés ci-dessous. 
+                  <a href="https://www.twilio.com/docs/whatsapp/sandbox" target="_blank" rel="noopener noreferrer" className="text-green-400 underline ml-1">Guide Sandbox</a>
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <label className="block mb-1 text-white text-xs">Account SID</label>
+                    <input 
+                      type="text" 
+                      value={whatsAppConfig.accountSid}
+                      onChange={e => setWhatsAppConfig({...whatsAppConfig, accountSid: e.target.value})}
+                      className="w-full px-3 py-2 rounded-lg neon-input text-sm"
+                      placeholder="ACxxxxxxxxxxxxxxx"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1 text-white text-xs">Auth Token</label>
+                    <input 
+                      type="password" 
+                      value={whatsAppConfig.authToken}
+                      onChange={e => setWhatsAppConfig({...whatsAppConfig, authToken: e.target.value})}
+                      className="w-full px-3 py-2 rounded-lg neon-input text-sm"
+                      placeholder="••••••••••••••••"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1 text-white text-xs">From Number (Sandbox)</label>
+                    <input 
+                      type="text" 
+                      value={whatsAppConfig.fromNumber}
+                      onChange={e => setWhatsAppConfig({...whatsAppConfig, fromNumber: e.target.value})}
+                      className="w-full px-3 py-2 rounded-lg neon-input text-sm"
+                      placeholder="+14155238886"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-3 items-center">
+                  <button 
+                    type="button"
+                    onClick={handleSaveWhatsAppConfig}
+                    className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-medium"
+                  >
+                    💾 Sauvegarder
+                  </button>
+                  
+                  {/* Test WhatsApp */}
+                  <div className="flex items-center gap-2 flex-1">
+                    <input 
+                      type="tel"
+                      value={testWhatsAppNumber}
+                      onChange={e => setTestWhatsAppNumber(e.target.value)}
+                      className="flex-1 px-3 py-2 rounded-lg neon-input text-sm"
+                      placeholder="+41791234567"
+                    />
+                    <button 
+                      type="button"
+                      onClick={handleTestWhatsApp}
+                      disabled={testWhatsAppStatus === 'sending' || !whatsAppConfig.accountSid}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        testWhatsAppStatus === 'success' ? 'bg-green-600' :
+                        testWhatsAppStatus === 'error' ? 'bg-red-600' :
+                        testWhatsAppStatus === 'sending' ? 'bg-yellow-600' :
+                        'bg-purple-600 hover:bg-purple-700'
+                      } text-white disabled:opacity-50`}
+                    >
+                      {testWhatsAppStatus === 'sending' ? '⏳...' :
+                       testWhatsAppStatus === 'success' ? '✅ Envoyé!' :
+                       testWhatsAppStatus === 'error' ? '❌ Erreur' :
+                       '🧪 Tester'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-3 rounded-lg bg-green-900/20 border border-green-500/20">
+                  <p className="text-xs text-white/70">
+                    <strong>📋 Configuration Sandbox Twilio :</strong><br/>
+                    1. Allez sur <code className="text-green-400">console.twilio.com/us1/develop/sms/try-it-out/whatsapp-learn</code><br/>
+                    2. Envoyez "join &lt;code&gt;" au numéro sandbox depuis votre WhatsApp<br/>
+                    3. Utilisez le numéro sandbox comme "From Number": <code className="text-green-400">+14155238886</code>
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* New Campaign Form */}
             <form onSubmit={createCampaign} className="mb-8 p-5 rounded-xl glass">
               <h3 className="text-white font-semibold mb-4">Nouvelle Campagne</h3>
