@@ -476,9 +476,15 @@ const LanguageSelector = ({ lang, setLang }) => {
   );
 };
 
-// Media Display Component (YouTube, Vimeo, Image, Video) - Strict 16:9 ratio with click protection
+// Media Display Component (YouTube, Vimeo, Image, Video) - Optimized visibility with validation
 const MediaDisplay = ({ url, className }) => {
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const media = parseMediaUrl(url);
+  
+  // Placeholder Afroboost par défaut
+  const placeholderUrl = "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&h=450&fit=crop";
+  
   // Return null if no valid media URL
   if (!media || !url || url.trim() === '') return null;
 
@@ -494,7 +500,7 @@ const MediaDisplay = ({ url, className }) => {
     borderRadius: '16px',
     border: '1px solid rgba(217, 28, 210, 0.3)',
     boxShadow: '0 0 30px rgba(217, 28, 210, 0.2)',
-    background: '#000'
+    background: '#0a0a0a'
   };
 
   const contentStyle = {
@@ -505,7 +511,7 @@ const MediaDisplay = ({ url, className }) => {
     height: '100%'
   };
 
-  // Full overlay to prevent all interactions with video controls and links
+  // Full overlay to prevent all interactions with video controls and links - TRANSPARENT
   const fullOverlayStyle = {
     position: 'absolute',
     top: 0,
@@ -518,33 +524,55 @@ const MediaDisplay = ({ url, className }) => {
     pointerEvents: 'auto'
   };
 
-  // Top bar overlay - Hide YouTube title/info bar precisely
+  // Top bar overlay - RÉDUIT: Plus fin et plus transparent pour la lisibilité
   const topBarOverlayStyle = {
     position: 'absolute',
     top: 0,
     left: 0,
     width: '100%',
-    height: isMobile ? '55px' : '80px',
+    height: isMobile ? '35px' : '50px', // Réduit de 55/80 à 35/50
     zIndex: 15,
-    background: isMobile 
-      ? 'linear-gradient(180deg, #000000 0%, #000000 60%, transparent 100%)'
-      : 'linear-gradient(180deg, #000000 0%, #000000 50%, rgba(0,0,0,0.8) 80%, transparent 100%)',
+    background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)', // Plus transparent
     pointerEvents: 'auto'
   };
 
-  // Bottom bar overlay - Hide YouTube watermark precisely
+  // Bottom bar overlay - RÉDUIT: Plus fin et plus transparent
   const bottomBarOverlayStyle = {
     position: 'absolute',
     bottom: 0,
     left: 0,
     width: '100%',
-    height: isMobile ? '50px' : '70px',
+    height: isMobile ? '30px' : '45px', // Réduit de 50/70 à 30/45
     zIndex: 15,
-    background: isMobile 
-      ? 'linear-gradient(0deg, #000000 0%, #000000 60%, transparent 100%)'
-      : 'linear-gradient(0deg, #000000 0%, #000000 50%, rgba(0,0,0,0.8) 80%, transparent 100%)',
+    background: 'linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)', // Plus transparent
     pointerEvents: 'auto'
   };
+
+  // Afficher le placeholder si erreur de chargement
+  if (hasError) {
+    return (
+      <div className={className} style={containerStyle} data-testid="media-container-placeholder">
+        <img 
+          src={placeholderUrl} 
+          alt="Afroboost" 
+          style={{ ...contentStyle, objectFit: 'cover' }}
+        />
+        <div style={{
+          position: 'absolute',
+          bottom: '10px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.7)',
+          padding: '6px 12px',
+          borderRadius: '8px',
+          fontSize: '12px',
+          color: 'rgba(255,255,255,0.8)'
+        }}>
+          ⚠️ Média non disponible
+        </div>
+      </div>
+    );
+  }
 
   if (media.type === 'youtube') {
     // YouTube params: modestbranding=1, rel=0, showinfo=0 to hide external links
@@ -556,12 +584,11 @@ const MediaDisplay = ({ url, className }) => {
           allow="autoplay; encrypted-media" 
           style={contentStyle}
           title="YouTube video"
+          onError={() => setHasError(true)}
         />
-        {/* Top gradient overlay to hide title/logo */}
+        {/* Overlays réduits pour meilleure visibilité */}
         <div style={topBarOverlayStyle} onClick={(e) => e.preventDefault()} />
-        {/* Bottom gradient overlay to hide YouTube watermark */}
         <div style={bottomBarOverlayStyle} onClick={(e) => e.preventDefault()} />
-        {/* Full overlay to block all clicks */}
         <div style={fullOverlayStyle} onClick={(e) => e.preventDefault()} />
       </div>
     );
@@ -576,8 +603,9 @@ const MediaDisplay = ({ url, className }) => {
           allow="autoplay" 
           style={contentStyle}
           title="Vimeo video"
+          onError={() => setHasError(true)}
         />
-        {/* Overlays to block clicks */}
+        {/* Overlays réduits */}
         <div style={topBarOverlayStyle} onClick={(e) => e.preventDefault()} />
         <div style={bottomBarOverlayStyle} onClick={(e) => e.preventDefault()} />
         <div style={fullOverlayStyle} onClick={(e) => e.preventDefault()} />
@@ -588,7 +616,15 @@ const MediaDisplay = ({ url, className }) => {
   if (media.type === 'video') {
     return (
       <div className={className} style={containerStyle} data-testid="media-container-16-9">
-        <video src={media.url} autoPlay loop muted playsInline style={{ ...contentStyle, objectFit: 'cover' }} />
+        <video 
+          src={media.url} 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          style={{ ...contentStyle, objectFit: 'cover' }}
+          onError={() => setHasError(true)}
+        />
       </div>
     );
   }
@@ -596,7 +632,12 @@ const MediaDisplay = ({ url, className }) => {
   // Image type
   return (
     <div className={className} style={containerStyle} data-testid="media-container-16-9">
-      <img src={media.url} alt="Media" style={{ ...contentStyle, objectFit: 'cover' }} />
+      <img 
+        src={media.url} 
+        alt="Media" 
+        style={{ ...contentStyle, objectFit: 'cover' }}
+        onError={() => setHasError(true)}
+      />
     </div>
   );
 };
