@@ -1,6 +1,10 @@
 // Configuration globale de l'application Afroboost
 // Compatible Vercel / Node.js
+// Re-export from constants.js pour compatibilité
 
+export * from './constants';
+
+// Objet de config groupé pour import simple
 export const APP_CONFIG = {
   // Admin
   ADMIN_EMAIL: 'contact.artboost@gmail.com',
@@ -24,8 +28,10 @@ export const APP_CONFIG = {
   // Storage Keys
   STORAGE_KEYS: {
     COACH_AUTH: 'coachAuth',
-    USER_LANG: 'userLang',
-    RESERVATIONS: 'afroboost_reservations'
+    USER_LANG: 'af_lang',
+    CLIENT_INFO: 'af_client_info',
+    RESERVATIONS: 'afroboost_reservations',
+    PWA_DISMISSED: 'af_pwa_dismissed'
   }
 };
 
