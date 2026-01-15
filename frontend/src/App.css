@@ -177,8 +177,8 @@ html, body {
   border: 1px solid rgba(139, 92, 246, 0.25);
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), 0 0 5px rgba(139, 92, 246, 0.1);
   background: linear-gradient(180deg, rgba(5, 5, 10, 0.95) 0%, rgba(25, 12, 35, 0.7) 100%);
-  overflow: visible;
-  height: auto;
+  overflow: visible !important;
+  height: auto !important;
 }
 
 .offer-card:hover {
@@ -194,8 +194,15 @@ html, body {
     0 0 25px rgba(139, 92, 246, 0.5),
     0 0 40px rgba(139, 92, 246, 0.25),
     inset 0 0 30px rgba(139, 92, 246, 0.08);
-  overflow: visible;
-  height: auto;
+  overflow: visible !important;
+  height: auto !important;
+}
+
+/* QR Scanner Container - Fixed Dimensions */
+#qr-reader, #reader {
+  width: 100% !important;
+  min-height: 250px;
+  background: #000;
 }
 
 /* Offer Card Image - Full Cover */
