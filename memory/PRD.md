@@ -332,6 +332,12 @@ Application de réservation de casques audio pour des cours de fitness Afroboost
   - **CDNs supportés** : ImgBB, Cloudinary, Imgur, Unsplash, Pexels reconnus
   - **Logs d'erreur améliorés** : Messages détaillés côté frontend et backend pour diagnostiquer les échecs
   - **Navigation vérifiée** : Filtres épurés, recherche rose, scroll mobile fluide fonctionnels
+- [x] **Navigation Épurée & Contrôle d'Atterrissage (15 Jan 2026)**:
+  - **Filtres masqués** : Boutons "Tout", "Sessions", "Offres", "Shop" cachés côté client
+  - **Barre de recherche rose uniquement** : Seul élément de navigation visible, bordure rose
+  - **Sélecteur admin "📍 Section d'atterrissage"** : Dans Concept & Visuel avec options Sessions/Offres/Shop
+  - **Scroll automatique** : Au chargement, scroll fluide vers la section configurée dans MongoDB
+  - **Recherche fonctionnelle** : Filtre en temps réel par titre des offres/produits
 
 ### P1 - À faire
 - [ ] Continuer refactoring: Extraire CoachDashboard, CoachLoginModal dans composants séparés
