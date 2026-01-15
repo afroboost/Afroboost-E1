@@ -1672,14 +1672,27 @@ const CoachDashboard = ({ t, lang, onBack, onLogout }) => {
                 <tbody>
                   {reservations.map(r => {
                     const dt = new Date(r.datetime);
+                    const isProduct = r.selectedVariants || r.trackingNumber || r.shippingStatus !== 'pending';
                     return (
                       <tr key={r.id} className={r.validated ? 'bg-green-900/20' : ''}>
                         <td style={{ fontWeight: 'bold', color: '#d91cd2' }}>{r.reservationCode || '-'}</td>
                         <td>{r.userName}</td><td>{r.userEmail}</td><td>{r.userWhatsapp || '-'}</td>
                         <td>{r.courseName}</td><td>{dt.toLocaleDateString('fr-CH')}</td>
                         <td>{dt.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })}</td>
-                        <td>{r.offerName}</td><td>{r.quantity || 1}</td>
-                        <td style={{ fontWeight: 'bold' }}>CHF {r.totalPrice || r.price}</td>
+                        <td>
+                          {r.offerName}
+                          {r.selectedVariants && (
+                            <span className="block text-xs opacity-50">
+                              {r.selectedVariants.size && `Taille: ${r.selectedVariants.size}`}
+                              {r.selectedVariants.color && ` | ${r.selectedVariants.color}`}
+                            </span>
+                          )}
+                        </td>
+                        <td>{r.quantity || 1}</td>
+                        <td style={{ fontWeight: 'bold' }}>
+                          CHF {r.totalPrice || r.price}
+                          {r.tva > 0 && <span className="text-xs opacity-50 block">TVA {r.tva}%</span>}
+                        </td>
                         <td>
                           {r.validated ? (
                             <span className="px-2 py-1 rounded text-xs bg-green-600 text-white">✅ Validé</span>
@@ -1687,10 +1700,35 @@ const CoachDashboard = ({ t, lang, onBack, onLogout }) => {
                             <span className="px-2 py-1 rounded text-xs bg-yellow-600 text-white">⏳ En attente</span>
                           )}
                         </td>
+                        {/* Shipping column for products */}
+                        <td>
+                          {isProduct ? (
+                            <div className="flex flex-col gap-1">
+                              <input 
+                                type="text" 
+                                placeholder="N° suivi" 
+                                defaultValue={r.trackingNumber || ''}
+                                onBlur={(e) => updateTracking(r.id, e.target.value, r.shippingStatus || 'pending')}
+                                className="px-2 py-1 rounded text-xs neon-input w-24"
+                              />
+                              <select 
+                                defaultValue={r.shippingStatus || 'pending'}
+                                onChange={(e) => updateTracking(r.id, r.trackingNumber, e.target.value)}
+                                className="px-2 py-1 rounded text-xs neon-input"
+                              >
+                                <option value="pending">📦 En attente</option>
+                                <option value="shipped">🚚 Expédié</option>
+                                <option value="delivered">✅ Livré</option>
+                              </select>
+                            </div>
+                          ) : (
+                            <span className="text-xs opacity-30">-</span>
+                          )}
+                        </td>
                       </tr>
                     );
                   })}
-                  {reservations.length === 0 && <tr><td colSpan="11" className="text-center py-8" style={{ opacity: 0.5 }}>{t('noReservations')}</td></tr>}
+                  {reservations.length === 0 && <tr><td colSpan="12" className="text-center py-8" style={{ opacity: 0.5 }}>{t('noReservations')}</td></tr>}
                 </tbody>
               </table>
             </div>
