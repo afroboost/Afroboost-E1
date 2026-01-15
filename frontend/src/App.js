@@ -1086,6 +1086,14 @@ const QRScannerModal = ({ onClose, onValidate, scanResult, scanError, onManualVa
         {/* Camera Scanner */}
         {!scanResult?.success && !manualMode && (
           <div className="mb-4">
+            {/* Initializing Camera Indicator */}
+            {initializingCamera && (
+              <div className="flex flex-col items-center justify-center py-8 mb-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent mb-4"></div>
+                <p className="text-white text-sm">Initialisation de la caméra...</p>
+              </div>
+            )}
+            
             <div 
               id="qr-reader" 
               ref={scannerRef}
@@ -1093,11 +1101,12 @@ const QRScannerModal = ({ onClose, onValidate, scanResult, scanError, onManualVa
               style={{ 
                 width: '100%', 
                 minHeight: scanning ? '280px' : '0px',
-                background: scanning ? '#000' : 'transparent'
+                background: scanning ? '#000' : 'transparent',
+                display: initializingCamera ? 'none' : 'block'
               }}
             />
             
-            {!scanning ? (
+            {!scanning && !initializingCamera ? (
               <button 
                 onClick={startScanning}
                 className="w-full py-4 rounded-lg btn-primary flex items-center justify-center gap-2 text-lg"
