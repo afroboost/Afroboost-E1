@@ -3238,53 +3238,119 @@ const CoachDashboard = ({ t, lang, onBack, onLogout }) => {
                     )}
                   </div>
 
-                  {/* === WHATSAPP UN PAR UN === */}
+                  {/* === WHATSAPP AUTOMATIQUE (Twilio) === */}
                   <div className="p-4 rounded-xl bg-green-900/20 border border-green-500/30">
                     <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
                       📱 WhatsApp
+                      <button 
+                        type="button"
+                        onClick={() => setShowWhatsAppConfig(!showWhatsAppConfig)}
+                        className="ml-auto text-xs text-green-400 hover:text-green-300"
+                      >
+                        ⚙️ Config
+                      </button>
                     </h4>
-                    {contactStats.withPhone > 0 ? (
-                      <>
-                        <p className="text-xs text-white/60 mb-2">
-                          Contact {currentWhatsAppIndex + 1}/{contactStats.withPhone}
-                        </p>
-                        {getCurrentWhatsAppContact() && (
-                          <p className="text-sm text-green-300 mb-3 truncate">
-                            → {getCurrentWhatsAppContact()?.name}
-                          </p>
-                        )}
-                        <a 
-                          href={getCurrentWhatsAppContact() ? generateWhatsAppLink(
-                            getCurrentWhatsAppContact()?.phone,
-                            newCampaign.message,
-                            newCampaign.mediaUrl,
-                            getCurrentWhatsAppContact()?.name
-                          ) : '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block w-full py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-center font-medium mb-2 transition-all"
-                        >
-                          📱 Envoyer
-                        </a>
-                        <div className="flex gap-2">
-                          <button 
-                            type="button"
-                            onClick={prevWhatsAppContact}
-                            disabled={currentWhatsAppIndex === 0}
-                            className="flex-1 py-2 rounded-lg glass text-white text-sm disabled:opacity-30"
-                          >
-                            ← Préc.
-                          </button>
-                          <button 
-                            type="button"
-                            onClick={nextWhatsAppContact}
-                            disabled={currentWhatsAppIndex >= contactStats.withPhone - 1}
-                            className="flex-1 py-2 rounded-lg glass text-white text-sm disabled:opacity-30"
-                          >
-                            Suivant →
-                          </button>
+                    
+                    {/* Barre de progression WhatsApp */}
+                    {whatsAppSendingProgress && (
+                      <div className="mb-3">
+                        <div className="flex justify-between text-xs text-white/80 mb-1">
+                          <span>Envoi en cours...</span>
+                          <span>{whatsAppSendingProgress.current}/{whatsAppSendingProgress.total}</span>
                         </div>
-                      </>
+                        <div className="w-full bg-gray-700 rounded-full h-2">
+                          <div 
+                            className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${(whatsAppSendingProgress.current / whatsAppSendingProgress.total) * 100}%` }}
+                          />
+                        </div>
+                        {whatsAppSendingProgress.name && (
+                          <p className="text-xs text-green-300 mt-1 truncate">→ {whatsAppSendingProgress.name}</p>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Résultats WhatsApp */}
+                    {whatsAppSendingResults && !whatsAppSendingProgress && (
+                      <div className="mb-3 p-2 rounded-lg bg-black/30">
+                        <p className="text-sm font-semibold text-white">
+                          ✅ {whatsAppSendingResults.sent} envoyé(s)
+                          {whatsAppSendingResults.failed > 0 && (
+                            <span className="text-red-400 ml-2">❌ {whatsAppSendingResults.failed} échec(s)</span>
+                          )}
+                        </p>
+                        <button 
+                          type="button"
+                          onClick={() => setWhatsAppSendingResults(null)}
+                          className="text-xs text-green-400 mt-1"
+                        >
+                          Fermer
+                        </button>
+                      </div>
+                    )}
+                    
+                    <p className="text-xs text-white/60 mb-3">
+                      {contactStats.withPhone} destinataire(s)
+                      {isWhatsAppConfigured() ? (
+                        <span className="text-green-400 ml-1">✓ Twilio</span>
+                      ) : (
+                        <span className="text-yellow-400 ml-1">⚠️ Non configuré</span>
+                      )}
+                    </p>
+                    
+                    {contactStats.withPhone > 0 ? (
+                      <div className="space-y-2">
+                        <button 
+                          type="button"
+                          onClick={handleSendWhatsAppCampaign}
+                          disabled={whatsAppSendingProgress !== null || !isWhatsAppConfigured()}
+                          className="w-full py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-center font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                        >
+                          {whatsAppSendingProgress ? '⏳ Envoi...' : '🚀 Auto (Twilio)'}
+                        </button>
+                        
+                        {/* Mode manuel conservé */}
+                        <div className="border-t border-green-500/20 pt-2 mt-2">
+                          <p className="text-xs text-white/40 mb-1">Mode manuel:</p>
+                          <p className="text-xs text-white/60 mb-1">
+                            {currentWhatsAppIndex + 1}/{contactStats.withPhone}
+                            {getCurrentWhatsAppContact() && (
+                              <span className="text-green-300 ml-1">→ {getCurrentWhatsAppContact()?.name}</span>
+                            )}
+                          </p>
+                          <div className="flex gap-1">
+                            <button 
+                              type="button"
+                              onClick={prevWhatsAppContact}
+                              disabled={currentWhatsAppIndex === 0}
+                              className="flex-1 py-1 rounded glass text-white text-xs disabled:opacity-30"
+                            >
+                              ←
+                            </button>
+                            <a 
+                              href={getCurrentWhatsAppContact() ? generateWhatsAppLink(
+                                getCurrentWhatsAppContact()?.phone,
+                                newCampaign.message,
+                                newCampaign.mediaUrl,
+                                getCurrentWhatsAppContact()?.name
+                              ) : '#'}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-2 py-1 px-2 rounded bg-green-700 text-white text-xs text-center"
+                            >
+                              Ouvrir
+                            </a>
+                            <button 
+                              type="button"
+                              onClick={nextWhatsAppContact}
+                              disabled={currentWhatsAppIndex >= contactStats.withPhone - 1}
+                              className="flex-1 py-1 rounded glass text-white text-xs disabled:opacity-30"
+                            >
+                              →
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     ) : (
                       <button disabled className="w-full py-3 rounded-lg bg-gray-600/50 text-gray-400 cursor-not-allowed">
                         Aucun numéro
