@@ -1374,23 +1374,92 @@ const CoachDashboard = ({ t, lang, onBack, onLogout }) => {
     setNewCourse({ name: "", weekday: 0, time: "18:30", locationName: "", mapsUrl: "" });
   };
 
-  const updateOffer = async (offer) => { await axios.put(`${API}/offers/${offer.id}`, offer); };
+  const updateOffer = async (offer) => { 
+    try {
+      await axios.put(`${API}/offers/${offer.id}`, offer); 
+    } catch (err) {
+      console.error("Erreur mise à jour offre:", err);
+    }
+  };
+
+  // Supprimer une offre
+  const deleteOffer = async (offerId) => {
+    if (!window.confirm("Supprimer cette offre ?")) return;
+    try {
+      await axios.delete(`${API}/offers/${offerId}`);
+      setOffers(prevOffers => prevOffers.filter(o => o.id !== offerId));
+    } catch (err) {
+      console.error("Erreur suppression offre:", err);
+      alert("Erreur lors de la suppression");
+    }
+  };
+
+  // Charger une offre dans le formulaire pour modification
+  const startEditOffer = (offer) => {
+    const images = offer.images || [];
+    // Remplir les 5 champs avec les images existantes
+    const paddedImages = [...images, "", "", "", "", ""].slice(0, 5);
+    setNewOffer({
+      name: offer.name || "",
+      price: offer.price || 0,
+      visible: offer.visible !== false,
+      description: offer.description || "",
+      images: paddedImages,
+      category: offer.category || "service",
+      isProduct: offer.isProduct || false,
+      variants: offer.variants || null,
+      tva: offer.tva || 0,
+      shippingCost: offer.shippingCost || 0,
+      stock: offer.stock ?? -1
+    });
+    setEditingOfferId(offer.id);
+    // Scroll vers le formulaire
+    document.getElementById('offer-form')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Annuler l'édition
+  const cancelEditOffer = () => {
+    setNewOffer({ 
+      name: "", price: 0, visible: true, description: "",
+      images: ["", "", "", "", ""],
+      category: "service", isProduct: false, variants: null, tva: 0, shippingCost: 0, stock: -1
+    });
+    setEditingOfferId(null);
+  };
+
+  // Ajouter ou mettre à jour une offre
   const addOffer = async (e) => {
     e.preventDefault();
     if (!newOffer.name) return;
     try {
-      // Support multi-images: parse URLs séparées par virgules
+      // Filtrer les images non vides
+      const filteredImages = newOffer.images.filter(url => url && url.trim());
       const offerData = {
         ...newOffer,
-        thumbnail: newOffer.thumbnail ? newOffer.thumbnail.split(',')[0].trim() : '', // Première image comme thumbnail principal
-        images: newOffer.thumbnail ? newOffer.thumbnail.split(',').map(url => url.trim()).filter(url => url) : []
+        images: filteredImages,
+        thumbnail: filteredImages[0] || "" // Première image comme thumbnail
       };
-      const response = await axios.post(`${API}/offers`, offerData);
-      setOffers(prevOffers => [...prevOffers, response.data]);
-      setNewOffer({ name: "", price: 0, visible: true, thumbnail: "", description: "", category: "service", isProduct: false, variants: null, tva: 0, shippingCost: 0, stock: -1 });
+
+      if (editingOfferId) {
+        // Mode édition : mettre à jour
+        await axios.put(`${API}/offers/${editingOfferId}`, offerData);
+        setOffers(prevOffers => prevOffers.map(o => o.id === editingOfferId ? { ...o, ...offerData } : o));
+        setEditingOfferId(null);
+      } else {
+        // Mode ajout : créer nouvelle offre
+        const response = await axios.post(`${API}/offers`, offerData);
+        setOffers(prevOffers => [...prevOffers, response.data]);
+      }
+      
+      // Reset formulaire
+      setNewOffer({ 
+        name: "", price: 0, visible: true, description: "",
+        images: ["", "", "", "", ""],
+        category: "service", isProduct: false, variants: null, tva: 0, shippingCost: 0, stock: -1 
+      });
     } catch (err) {
-      console.error("Erreur ajout offre:", err);
-      alert("Erreur lors de l'ajout de l'offre");
+      console.error("Erreur offre:", err);
+      alert("Erreur lors de l'opération");
     }
   };
 
