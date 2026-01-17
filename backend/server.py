@@ -1177,18 +1177,18 @@ async def chat_with_ai(data: ChatMessage):
     
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage
+        import uuid
         
         emergent_key = os.environ.get("EMERGENT_LLM_KEY")
         if not emergent_key:
             return {"response": "Configuration IA incomplète. Contactez l'administrateur.", "responseTime": 0}
         
-        model = ai_config.get("model", "gpt-4o-mini")
-        provider = ai_config.get("provider", "openai")
+        # Generate a unique session ID for this chat
+        session_id = f"afroboost_chat_{uuid.uuid4().hex[:8]}"
         
         chat = LlmChat(
             api_key=emergent_key,
-            model=model,
-            provider=provider,
+            session_id=session_id,
             system_message=full_system_prompt
         )
         
