@@ -3,6 +3,7 @@ import "@/App.css";
 import axios from "axios";
 import { QRCodeSVG } from "qrcode.react";
 import { Html5Qrcode } from "html5-qrcode";
+import html2canvas from "html2canvas";
 import { 
   getEmailJSConfig, 
   saveEmailJSConfig, 
