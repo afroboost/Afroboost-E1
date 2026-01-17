@@ -5351,69 +5351,58 @@ function App() {
     }
   }, [coachMode, fetchData]);
 
-  // Update favicon dynamically when logoUrl changes (fallback if no faviconUrl)
-  useEffect(() => {
-    // Only use logoUrl as favicon if no faviconUrl is set
-    if (concept.logoUrl && concept.logoUrl.trim() !== '' && (!concept.faviconUrl || concept.faviconUrl.trim() === '')) {
-      // Update favicon
-      let link = document.querySelector("link[rel~='icon']");
-      if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
-        document.head.appendChild(link);
-      }
-      link.href = concept.logoUrl;
-      
-      // Update apple-touch-icon for PWA
-      let appleLink = document.querySelector("link[rel='apple-touch-icon']");
-      if (!appleLink) {
-        appleLink = document.createElement('link');
-        appleLink.rel = 'apple-touch-icon';
-        document.head.appendChild(appleLink);
-      }
-      appleLink.href = concept.logoUrl;
+  // =====================================================
+  // FAVICON & PWA: Fonction centralisée pour mettre à jour le favicon
+  // Supprime TOUS les favicons existants avant d'en injecter un seul
+  // =====================================================
+  
+  const updateAllFavicons = useCallback((newFaviconUrl) => {
+    if (!newFaviconUrl || newFaviconUrl.trim() === '') return;
+    
+    // 1. SUPPRIMER tous les liens favicon existants
+    const existingIcons = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"], link[rel~="icon"]');
+    existingIcons.forEach(icon => icon.remove());
+    
+    // 2. SUPPRIMER tous les apple-touch-icon existants
+    const existingAppleIcons = document.querySelectorAll('link[rel="apple-touch-icon"], link[rel="apple-touch-icon-precomposed"]');
+    existingAppleIcons.forEach(icon => icon.remove());
+    
+    // 3. CRÉER un seul nouveau favicon
+    const newFavicon = document.createElement('link');
+    newFavicon.rel = 'icon';
+    newFavicon.type = 'image/png';
+    newFavicon.href = newFaviconUrl;
+    document.head.appendChild(newFavicon);
+    
+    // 4. CRÉER un seul apple-touch-icon pour PWA
+    const newAppleIcon = document.createElement('link');
+    newAppleIcon.rel = 'apple-touch-icon';
+    newAppleIcon.href = newFaviconUrl;
+    document.head.appendChild(newAppleIcon);
+    
+    // 5. Mettre à jour le manifest pour PWA
+    let manifestLink = document.querySelector("link[rel='manifest']");
+    if (manifestLink) {
+      const apiUrl = process.env.REACT_APP_BACKEND_URL || '';
+      manifestLink.href = `${apiUrl}/api/manifest.json?v=${Date.now()}`;
     }
-  }, [concept.logoUrl, concept.faviconUrl]);
+    
+    console.log("✅ Favicon unique mis à jour:", newFaviconUrl);
+  }, []);
 
-  // Update favicon dynamically when faviconUrl changes (priority over logoUrl)
+  // Update favicon when faviconUrl changes (priority)
   useEffect(() => {
     if (concept.faviconUrl && concept.faviconUrl.trim() !== '') {
-      // Update favicon immediately - faviconUrl has priority
-      let link = document.querySelector("link[rel~='icon']");
-      if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
-        document.head.appendChild(link);
-      }
-      link.href = concept.faviconUrl;
-      
-      // Update apple-touch-icon for PWA with faviconUrl
-      let appleLink = document.querySelector("link[rel='apple-touch-icon']");
-      if (!appleLink) {
-        appleLink = document.createElement('link');
-        appleLink.rel = 'apple-touch-icon';
-        document.head.appendChild(appleLink);
-      }
-      appleLink.href = concept.faviconUrl;
-      
-      console.log("Favicon updated to:", concept.faviconUrl);
+      updateAllFavicons(concept.faviconUrl);
     }
-  }, [concept.faviconUrl]);
+  }, [concept.faviconUrl, updateAllFavicons]);
 
-  // Update manifest link to use dynamic API endpoint for PWA logo
+  // Update favicon when logoUrl changes (fallback if no faviconUrl)
   useEffect(() => {
-    const logoUrl = concept.faviconUrl || concept.logoUrl;
-    if (logoUrl && logoUrl.trim() !== '') {
-      // Update manifest link to point to dynamic endpoint
-      let manifestLink = document.querySelector("link[rel='manifest']");
-      if (manifestLink) {
-        // Use API endpoint for dynamic manifest
-        const apiUrl = process.env.REACT_APP_BACKEND_URL || '';
-        manifestLink.href = `${apiUrl}/api/manifest.json`;
-        console.log("PWA Manifest updated to dynamic endpoint");
-      }
+    if (concept.logoUrl && concept.logoUrl.trim() !== '' && (!concept.faviconUrl || concept.faviconUrl.trim() === '')) {
+      updateAllFavicons(concept.logoUrl);
     }
-  }, [concept.logoUrl, concept.faviconUrl]);
+  }, [concept.logoUrl, concept.faviconUrl, updateAllFavicons]);
 
   // Scroll vers la section par défaut au chargement (si configuré par le coach)
   useEffect(() => {
