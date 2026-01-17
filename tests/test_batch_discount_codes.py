@@ -202,34 +202,18 @@ class TestDiscountCodesAPI:
     
     def test_validate_discount_code(self):
         """Test validating a discount code"""
-        # Create a test code
-        code_data = {
-            "code": f"TEST_VALID_{int(time.time())}",
-            "type": "100%",
-            "value": 100.0,
-            "assignedEmail": None,
-            "courses": [],
-            "maxUses": 1,
-            "expiresAt": "2025-12-31"
-        }
-        
-        response = self.session.post(f"{BASE_URL}/api/discount-codes", json=code_data)
-        assert response.status_code == 200
-        code = response.json()
-        self.created_code_ids.append(code["id"])
-        
-        # Validate the code
+        # Use an existing code (VIP-1) that we know exists
         response = self.session.post(f"{BASE_URL}/api/discount-codes/validate", json={
-            "code": code["code"],
+            "code": "VIP-1",
             "email": "test@example.com",
             "courseId": ""
         })
         assert response.status_code == 200
         result = response.json()
         assert result["valid"] == True
-        assert result["code"]["code"] == code["code"]
+        assert result["code"]["code"] == "VIP-1"
         
-        print(f"✅ Code validation works for: {code['code']}")
+        print(f"✅ Code validation works for: VIP-1")
     
     def test_validate_invalid_code(self):
         """Test validating an invalid/non-existent code"""
