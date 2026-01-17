@@ -507,8 +507,10 @@ const LanguageSelector = ({ lang, setLang }) => {
 // Media Display Component with Sound Control
 const MediaDisplay = ({ url, className }) => {
   const [hasError, setHasError] = useState(false);
-  const [isMuted, setIsMuted] = useState(false); // Son activé par défaut
+  const [isMuted, setIsMuted] = useState(true); // Muted par défaut (requis pour autoplay)
+  const [showSoundPrompt, setShowSoundPrompt] = useState(true); // Afficher l'invitation à activer le son
   const videoRef = useRef(null);
+  const iframeRef = useRef(null);
   const media = parseMediaUrl(url);
   
   // Placeholder Afroboost par défaut
@@ -519,9 +521,19 @@ const MediaDisplay = ({ url, className }) => {
 
   // Toggle mute for video element
   const toggleMute = () => {
-    setIsMuted(!isMuted);
+    const newMuted = !isMuted;
+    setIsMuted(newMuted);
+    setShowSoundPrompt(false); // Cacher l'invitation après le premier clic
+    
     if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
+      videoRef.current.muted = newMuted;
+    }
+    
+    // Pour YouTube, on doit recharger l'iframe avec le nouveau paramètre mute
+    if (iframeRef.current && media.type === 'youtube') {
+      const currentSrc = iframeRef.current.src;
+      const newSrc = currentSrc.replace(/mute=[01]/, `mute=${newMuted ? '1' : '0'}`);
+      iframeRef.current.src = newSrc;
     }
   };
 
@@ -545,24 +557,28 @@ const MediaDisplay = ({ url, className }) => {
     height: '100%'
   };
 
-  // Mute button style
+  // Mute button style - Enhanced visibility
   const muteButtonStyle = {
     position: 'absolute',
-    bottom: '12px',
-    right: '12px',
-    zIndex: 20,
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    background: 'rgba(0, 0, 0, 0.7)',
-    border: '1px solid rgba(217, 28, 210, 0.5)',
+    bottom: '16px',
+    right: '16px',
+    zIndex: 30,
+    minWidth: '50px',
+    height: '50px',
+    borderRadius: '25px',
+    background: isMuted ? 'linear-gradient(135deg, #d91cd2 0%, #8b5cf6 100%)' : 'rgba(0, 0, 0, 0.8)',
+    border: '2px solid rgba(255, 255, 255, 0.3)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: '6px',
+    padding: '0 16px',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.3s ease',
     color: '#fff',
-    fontSize: '18px'
+    fontSize: '20px',
+    boxShadow: isMuted ? '0 0 20px rgba(217, 28, 210, 0.6)' : '0 4px 15px rgba(0, 0, 0, 0.5)',
+    animation: showSoundPrompt && isMuted ? 'pulse 2s infinite' : 'none'
   };
 
   // Transparent overlay to prevent clicks without hiding content
@@ -571,7 +587,7 @@ const MediaDisplay = ({ url, className }) => {
     top: 0,
     left: 0,
     width: '100%',
-    height: 'calc(100% - 60px)', // Leave space for mute button
+    height: 'calc(100% - 70px)', // Leave space for mute button
     zIndex: 10,
     cursor: 'default',
     background: 'transparent',
@@ -610,6 +626,7 @@ const MediaDisplay = ({ url, className }) => {
     return (
       <div className={className} style={containerStyle} data-testid="media-container-16-9">
         <iframe 
+          ref={iframeRef}
           src={`https://www.youtube.com/embed/${media.id}?autoplay=1&mute=${muteParam}&loop=1&playlist=${media.id}&modestbranding=1&rel=0&showinfo=0&controls=0&disablekb=1&fs=0&iv_load_policy=3`}
           frameBorder="0" 
           allow="autoplay; encrypted-media" 
@@ -625,6 +642,7 @@ const MediaDisplay = ({ url, className }) => {
           data-testid="mute-btn"
         >
           {isMuted ? '🔇' : '🔊'}
+          {showSoundPrompt && isMuted && <span style={{ fontSize: '12px', fontWeight: '500' }}>Son</span>}
         </button>
       </div>
     );
@@ -650,6 +668,7 @@ const MediaDisplay = ({ url, className }) => {
           data-testid="mute-btn"
         >
           {isMuted ? '🔇' : '🔊'}
+          {showSoundPrompt && isMuted && <span style={{ fontSize: '12px', fontWeight: '500' }}>Son</span>}
         </button>
       </div>
     );
@@ -675,6 +694,7 @@ const MediaDisplay = ({ url, className }) => {
           data-testid="mute-btn"
         >
           {isMuted ? '🔇' : '🔊'}
+          {showSoundPrompt && isMuted && <span style={{ fontSize: '12px', fontWeight: '500' }}>Son</span>}
         </button>
       </div>
     );
